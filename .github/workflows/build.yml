@@ -30,11 +30,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push ARMv7
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/arm/v7
+          platforms: linux/arm64,linux/arm/v7,linux/amd64
           push: true
           provenance: false
-          tags: ghcr.io/dolinenkov/caddy-with-duckdns-and-cloudflare:armv7-test
+          tags: |
+            ghcr.io/dolinenkov/caddy-with-duckdns-and-cloudflare:${{ steps.meta.outputs.tag }}
