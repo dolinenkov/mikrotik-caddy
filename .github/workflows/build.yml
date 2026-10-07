@@ -1,7 +1,17 @@
-name: Build Caddy ARMv7
+name: Build Caddy
 
 on:
+  push:
+    branches:
+      - master
+
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Docker image tag
+        required: true
+        default: manual
+        type: string
 
 jobs:
   docker:
@@ -30,11 +40,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Determine image tag
+        id: meta
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=master" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Show image tag
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Tag:   ${{ steps.meta.outputs.tag }}"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/arm64,linux/arm/v7,linux/amd64
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           provenance: false
           tags: |
